@@ -63,7 +63,7 @@ def set_origin(traj1, traj2):
     transform(traj2,traj2_to_coordinate_origin)
 
 
-def umeyama_alignment(x, y):
+def umeyama_alignment(x, y,with_scale):
 
     if x.shape != y.shape:
         raise Exception("data matrices must have the same shape")
@@ -90,7 +90,7 @@ def umeyama_alignment(x, y):
 
     r = u.dot(s).dot(v)
 
-    c = 1 / sigma_x * np.trace(np.diag(d).dot(s)) 
+    c = 1 / sigma_x * np.trace(np.diag(d).dot(s)) if with_scale else 1.0
     t = mean_y - np.multiply(c, r.dot(mean_x))
 
     return r, t, c
@@ -108,9 +108,11 @@ if __name__=="__main__":
         traj_ref = file_interface.read_bag_trajectory(bag, sys.argv[2])
         traj_est = file_interface.read_bag_trajectory(bag, sys.argv[3])
         synv_traj_ref, synv_traj_est= sync.associate_trajectories(traj_ref, traj_est)
-        r_a, t_a, s = umeyama_alignment(synv_traj_ref.positions_xyz.T, synv_traj_est._positions_xyz.T)
+        r_a, t_a, s = umeyama_alignment(synv_traj_est._positions_xyz.T,synv_traj_ref.positions_xyz.T,True)
         T=np.r_[np.c_[r_a, t_a],[[0,0,0,1]]]
         transform(traj_est,T)
+        traj_ref.scale(s)
+        traj_est.scale(s)
         align_origin(traj_est,traj_ref)
         set_origin(traj_est,traj_ref)  
         with rosbag.Bag('output.bag', 'w') as outbag:
