@@ -7,3 +7,12 @@ RUN:
 
 $ ./align.py 
 
+trj_ref:
+
+/vrpn_client_node/bluerov/pose
+
+trj_est:
+
+/odometry/filtered
+
+
