@@ -9,6 +9,7 @@ $ ./align.py
 
 
 SPECIFY：
+
 trj_ref:/vrpn_client_node/bluerov/pose
 
 trj_est:/odometry/filtered
